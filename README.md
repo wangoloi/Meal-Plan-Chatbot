@@ -1,2 +1,2 @@
 # Meal-Plan-Chatbot
-Cultural-Aware Ai Meal Planner
+Cultural-Aware Ai Meal Planner.
