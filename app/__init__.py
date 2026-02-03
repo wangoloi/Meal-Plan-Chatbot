@@ -23,22 +23,22 @@ def create_app(config_name='development'):
     basedir = Path(__file__).resolve().parents[1]
 
     app = Flask(__name__,
-                template_folder=str(basedir / 'templates'),
-                static_folder=str(basedir / 'static'))
+                template_folder=basedir / 'templates',
+                static_folder=basedir / 'static') 
 
     # ── Basic configuration ────────────────────────────────────────
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
     if not app.config['SECRET_KEY']:
-        if os.getenv('FLASK_ENV') == 'production':
+        if app.env == 'production':
             raise RuntimeError("SECRET_KEY environment variable is required in production")
         app.config['SECRET_KEY'] = 'dev-only-insecure-key-change-me'
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
         'DATABASE_URL',
-        f"sqlite:///{basedir / 'instance' / 'zoenutritech.db'}"
+        "sqlite:///{basedir / 'instance' / 'zoenutritech.db'}" 
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['FLASK_ENV'] = os.getenv('FLASK_ENV', config_name)
+    app.env = os.getenv('FLASK_ENV', config_name)
 
     # ── Initialize extensions ──────────────────────────────────────
     db.init_app(app)
@@ -62,6 +62,6 @@ def create_app(config_name='development'):
     # Optional: basic health check route (good for first phase verification)
     @app.route('/health')
     def health():
-        return {"status": "ok", "env": app.config['FLASK_ENV']}, 200
+        return {"status": "ok", "env": app.env}, 200
 
     return app
