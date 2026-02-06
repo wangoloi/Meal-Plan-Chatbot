@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Recommendations - Glocusense{% endblock %}
+
+{% block content %}
+<div class="mobile-container">
+    <div class="mobile-header">
+        <div class="container">
+            <div style="padding: 1.5rem 0;">
+                <h1 style="color: white; margin-bottom: 0.5rem;">
+                    <i class="fas fa-lightbulb"></i> Recommendations
+                </h1>
+                <p style="color: rgba(255,255,255,0.9);">Personalized meal suggestions for you</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-content">
+        <div class="container">
+            <!-- Generate Recommendations Button -->
+            <div class="card" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                <button onclick="generateRecommendations()" class="btn btn-primary btn-full" id="generateBtn">
+                    <i class="fas fa-magic"></i> Generate Recommendations
+                </button>
+                <p style="text-align: center; color: var(--gray-600); font-size: 0.875rem; margin-top: 0.75rem;">
+                    Get personalized meal recommendations based on your profile
+                </p>
+            </div>
+
+            <!-- Recommendations List -->
+            {% if recommendations %}
+                <div class="card">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem;">
+                        <i class="fas fa-list"></i> Your Recommendations
+                    </h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        {% for rec in recommendations %}
+                        <div style="padding: 1.5rem; background: var(--gray-50); border-radius: 0.75rem; border-left: 4px solid var(--primary-blue);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                <h4 style="color: var(--gray-900); margin-bottom: 0.25rem;">
+                                    {{ rec.title }}
+                                </h4>
+                                <span style="padding: 0.25rem 0.5rem; background: var(--primary-blue); color: white; border-radius: 0.25rem; font-size: 0.75rem;">
+                                    {{ rec.recommendation_type|replace('_', ' ')|title }}
+                                </span>
+                            </div>
+                            
+                            {% if rec.description %}
+                            <p style="color: var(--gray-700); font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                {{ rec.description }}
+                            </p>
+                            {% endif %}
+                            
+                            <div style="font-size: 0.75rem; color: var(--gray-500);">
+                                <i class="fas fa-clock"></i> {{ rec.created_at.strftime('%B %d, %Y') if rec.created_at else 'Recently' }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-lightbulb" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--gray-600); margin-bottom: 1rem;">
+                        No recommendations yet
+                    </p>
+                    <p style="color: var(--gray-500); font-size: 0.875rem;">
+                        Click "Generate Recommendations" to get personalized meal suggestions
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function generateRecommendations() {
+    const btn = document.getElementById('generateBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    
+    fetch('{{ url_for("recommendations.generate") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to generate recommendations'));
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+</script>
+{% endblock %}
+

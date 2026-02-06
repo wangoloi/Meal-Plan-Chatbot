@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Diabetes Dashboard - Glocusense{% endblock %}
+
+{% block content %}
+<div class="mobile-container">
+    <div class="mobile-header">
+        <div class="container">
+            <div style="padding: 1.5rem 0;">
+                <h1 style="color: white; margin-bottom: 0.5rem;">
+                    <i class="fas fa-heartbeat"></i> Diabetes Management
+                </h1>
+                <p style="color: rgba(255,255,255,0.9); white-space: normal; word-wrap: break-word; overflow-wrap: break-word;">
+                    {% if diabetes_type_display %}
+                        {{ diabetes_type_display }} Diabetes
+                    {% elif user.diabetes_type %}
+                        {{ user.diabetes_type|trim }} Diabetes
+                    {% else %}
+                        Diabetes Management Dashboard
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-content">
+        <div class="container">
+            <!-- Statistics Cards -->
+            {% if stats %}
+            <div class="grid grid-2" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 2rem; color: var(--error); margin-bottom: 0.5rem;">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">Avg Blood Glucose</div>
+                    <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-blue);">
+                        {% if stats.avg_glucose %}
+                            {{ "%.1f"|format(stats.avg_glucose) }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--gray-500);">mg/dL</div>
+                </div>
+
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 0.5rem;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">In Range</div>
+                    <div style="font-size: 1.5rem; font-weight: 600; color: var(--success);">
+                        {% if stats.in_range_percentage is not none %}
+                            {{ "%.1f"|format(stats.in_range_percentage) }}%
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--gray-500);">of readings</div>
+                </div>
+            </div>
+
+            <div class="grid grid-2" style="margin-bottom: 1.5rem;">
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 0.5rem;">
+                        <i class="fas fa-syringe"></i>
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">Total Readings</div>
+                    <div style="font-size: 1.5rem; font-weight: 600; color: var(--gray-900);">
+                        {{ stats.total_readings or 0 }}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--gray-500);">records</div>
+                </div>
+
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem; 
+                        color: {% if stats.trend == 'improving' %}var(--success){% elif stats.trend == 'worsening' %}var(--error){% else %}var(--gray-500){% endif %};">
+                        <i class="fas fa-arrow-{% if stats.trend == 'improving' %}down{% elif stats.trend == 'worsening' %}up{% else %}right{% endif %}"></i>
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">Trend</div>
+                    <div style="font-size: 1.5rem; font-weight: 600; 
+                        color: {% if stats.trend == 'improving' %}var(--success){% elif stats.trend == 'worsening' %}var(--error){% else %}var(--gray-700){% endif %};">
+                        {{ stats.trend_display or stats.trend or 'N/A' }}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card" style="margin-top: 1.5rem; margin-bottom: 1.5rem; text-align: center; padding: 2rem;">
+                <i class="fas fa-chart-line" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+                <p style="color: var(--gray-600);">Start recording your blood glucose readings to see statistics</p>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <h3 style="color: var(--primary-blue); margin-bottom: 1rem;">
+                    <i class="fas fa-bolt"></i> Quick Actions
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <a href="{{ url_for('diabetes.record') }}" class="btn btn-primary btn-full">
+                        <i class="fas fa-plus"></i> Record Blood Glucose
+                    </a>
+                    <a href="{{ url_for('diabetes.progress') }}" class="btn btn-secondary btn-full">
+                        <i class="fas fa-chart-bar"></i> View Progress
+                    </a>
+                </div>
+            </div>
+
+            <!-- Today's Record -->
+            {% if today_record %}
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="color: var(--primary-blue);">
+                        <i class="fas fa-calendar-day"></i> Today's Record
+                    </h3>
+                    <a href="{{ url_for('diabetes.record') }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
+                    {% if today_record.before_breakfast %}
+                    <div style="padding: 1rem; background: var(--gray-50); border-radius: 0.5rem; text-align: center;">
+                        <div style="font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.5rem;">Before Breakfast</div>
+                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-blue);">
+                            {{ today_record.before_breakfast }} mg/dL
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if today_record.after_breakfast %}
+                    <div style="padding: 1rem; background: var(--gray-50); border-radius: 0.5rem; text-align: center;">
+                        <div style="font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.5rem;">After Breakfast</div>
+                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-blue);">
+                            {{ today_record.after_breakfast }} mg/dL
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if today_record.before_lunch %}
+                    <div style="padding: 1rem; background: var(--gray-50); border-radius: 0.5rem; text-align: center;">
+                        <div style="font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.5rem;">Before Lunch</div>
+                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-blue);">
+                            {{ today_record.before_lunch }} mg/dL
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if today_record.meal_description or today_record.notes %}
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
+                    {% if today_record.meal_description %}
+                    <div style="margin-bottom: 0.5rem;">
+                        <span style="font-size: 0.875rem; color: var(--gray-600);"><i class="fas fa-utensils"></i> Meal:</span>
+                        <span style="font-size: 0.875rem; color: var(--gray-800);">{{ today_record.meal_description }}</span>
+                    </div>
+                    {% endif %}
+                    {% if today_record.notes %}
+                    <div>
+                        <span style="font-size: 0.875rem; color: var(--gray-600);"><i class="fas fa-sticky-note"></i> Notes:</span>
+                        <span style="font-size: 0.875rem; color: var(--gray-800);">{{ today_record.notes }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="card" style="margin-bottom: 1.5rem; text-align: center; padding: 1.5rem;">
+                <i class="fas fa-calendar-day" style="font-size: 2rem; color: var(--gray-400); margin-bottom: 0.5rem;"></i>
+                <p style="color: var(--gray-600); margin-bottom: 1rem;">No record for today yet</p>
+                <a href="{{ url_for('diabetes.record') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Record Today's Reading
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Recent Records -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="color: var(--primary-blue);">
+                        <i class="fas fa-history"></i> Recent Records
+                    </h3>
+                    <a href="{{ url_for('diabetes.progress') }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                        <i class="fas fa-arrow-right"></i> View All
+                    </a>
+                </div>
+
+                {% if recent_records %}
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        {% for record in recent_records %}
+                        <div style="padding: 1rem; background: var(--gray-50); border-radius: 0.5rem; border-left: 4px solid var(--primary-blue);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                <strong style="color: var(--gray-900);">
+                                    {% if record.record_date %}
+                                        {{ record.record_date.strftime('%B %d, %Y') }}
+                                    {% elif record.created_at %}
+                                        {{ record.created_at.strftime('%B %d, %Y') }}
+                                    {% else %}
+                                        Today
+                                    {% endif %}
+                                </strong>
+                                {% if record.record_date and record.record_date == today %}
+                                <span style="color: var(--primary-blue); font-size: 0.75rem; padding: 0.25rem 0.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 0.25rem;">Today</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.75rem; font-size: 0.875rem;">
+                                {% if record.before_breakfast %}
+                                <div>
+                                    <div style="color: var(--gray-600); margin-bottom: 0.25rem;">Before Breakfast</div>
+                                    <div style="font-weight: 600; color: var(--primary-blue);">{{ record.before_breakfast }} mg/dL</div>
+                                </div>
+                                {% endif %}
+                                {% if record.after_breakfast %}
+                                <div>
+                                    <div style="color: var(--gray-600); margin-bottom: 0.25rem;">After Breakfast</div>
+                                    <div style="font-weight: 600; color: var(--primary-blue);">{{ record.after_breakfast }} mg/dL</div>
+                                </div>
+                                {% endif %}
+                                {% if record.before_lunch %}
+                                <div>
+                                    <div style="color: var(--gray-600); margin-bottom: 0.25rem;">Before Lunch</div>
+                                    <div style="font-weight: 600; color: var(--primary-blue);">{{ record.before_lunch }} mg/dL</div>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            {% if record.notes %}
+                            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--gray-200);">
+                                <span style="font-size: 0.875rem; color: var(--gray-600);"><i class="fas fa-sticky-note"></i> Notes:</span>
+                                <span style="font-size: 0.875rem; color: var(--gray-800);">{{ record.notes }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: var(--gray-500); text-align: center; padding: 2rem;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+                        No records yet. <a href="{{ url_for('diabetes.record') }}" style="color: var(--primary-blue);">Add your first record</a>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Blood Glucose Progress - Glocusense{% endblock %}
+
+{% block content %}
+<div class="mobile-container">
+    <div class="mobile-header">
+        <div class="container">
+            <div style="padding: 1.5rem 0;">
+                <h1 style="color: white; margin-bottom: 0.5rem;">
+                    <i class="fas fa-chart-line"></i> Progress
+                </h1>
+                <p style="color: rgba(255,255,255,0.9);">Track your glucose trends</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-content">
+        <div class="container">
+            {% if stats %}
+            <div class="card" style="margin-top: 2rem; margin-bottom: 1.5rem;">
+                <h3 style="margin-bottom: 1rem; color: var(--primary-blue);">
+                    <i class="fas fa-chart-bar"></i> Statistics (Last 30 Days)
+                </h3>
+                <div class="grid grid-3">
+                    <div style="text-align: center; padding: 1rem; background: var(--gray-50); border-radius: 0.5rem;">
+                        <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem;">Average</div>
+                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-blue);">{{ "%.1f"|format(stats.average) }} mg/dL</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: var(--gray-50); border-radius: 0.5rem;">
+                        <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem;">Minimum</div>
+                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--success);">{{ "%.1f"|format(stats.min) }} mg/dL</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: var(--gray-50); border-radius: 0.5rem;">
+                        <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem;">Maximum</div>
+                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--error);">{{ "%.1f"|format(stats.max) }} mg/dL</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="color: var(--primary-blue);">
+                        <i class="fas fa-history"></i> Recent Records
+                    </h3>
+                    <a href="{{ url_for('diabetes.record') }}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                        <i class="fas fa-plus"></i> Add Record
+                    </a>
+                </div>
+
+                {% if records %}
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        {% for record in records %}
+                        <div style="padding: 1.5rem; background: var(--gray-50); border-radius: 0.75rem; border-left: 4px solid var(--primary-blue);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                                <div>
+                                    <strong style="color: var(--gray-900); font-size: 1.125rem;">
+                                        {{ record.record_date.strftime('%B %d, %Y') if record.record_date else record.created_at.strftime('%B %d, %Y') if record.created_at else 'Today' }}
+                                    </strong>
+                                    {% if record.record_date == today %}
+                                    <span style="color: var(--primary-blue); font-size: 0.75rem; margin-left: 0.5rem; padding: 0.25rem 0.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 0.25rem;">Today</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                                {% if record.before_breakfast %}
+                                <div style="padding: 0.75rem; background: white; border-radius: 0.5rem;">
+                                    <div style="font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.25rem;">Before Breakfast</div>
+                                    <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-blue);">{{ record.before_breakfast }} mg/dL</div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if record.after_breakfast %}
+                                <div style="padding: 0.75rem; background: white; border-radius: 0.5rem;">
+                                    <div style="font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.25rem;">After Breakfast</div>
+                                    <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-blue);">{{ record.after_breakfast }} mg/dL</div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if record.before_lunch %}
+                                <div style="padding: 0.75rem; background: white; border-radius: 0.5rem;">
+                                    <div style="font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.25rem;">Before Lunch</div>
+                                    <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-blue);">{{ record.before_lunch }} mg/dL</div>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            {% if record.meal_description or record.notes %}
+                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
+                                {% if record.meal_description %}
+                                <div style="margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.875rem; color: var(--gray-600);"><i class="fas fa-utensils"></i> Meal:</span>
+                                    <span style="font-size: 0.875rem; color: var(--gray-800);">{{ record.meal_description }}</span>
+                                </div>
+                                {% endif %}
+                                {% if record.notes %}
+                                <div>
+                                    <span style="font-size: 0.875rem; color: var(--gray-600);"><i class="fas fa-sticky-note"></i> Notes:</span>
+                                    <span style="font-size: 0.875rem; color: var(--gray-800);">{{ record.notes }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: var(--gray-500); text-align: center; padding: 2rem;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+                        No records yet. Start tracking your glucose levels!
+                    </p>
+                    <div style="text-align: center;">
+                        <a href="{{ url_for('diabetes.record') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Record First Reading
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

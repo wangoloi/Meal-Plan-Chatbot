@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Glocusense{% endblock %}
+
+{% block content %}
+<div class="mobile-container">
+    <div class="mobile-header">
+        <div class="container">
+            <div style="padding: 1.5rem 0;">
+                <h1 style="color: white; margin-bottom: 0.5rem;">
+                    <i class="fas fa-user"></i> Profile
+                </h1>
+                <p style="color: rgba(255,255,255,0.9);">Manage your account settings</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-content">
+        <div class="container" style="max-width: 500px; margin: 0 auto;">
+            <form method="POST" action="{{ url_for('main.profile') }}">
+                <div class="card" style="margin-top: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary-blue);">
+                        <i class="fas fa-edit"></i> Personal Information
+                    </h3>
+
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" name="first_name" class="form-input" value="{{ user.first_name or '' }}" placeholder="First name">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" name="last_name" class="form-input" value="{{ user.last_name or '' }}" placeholder="Last name">
+                    </div>
+
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Age</label>
+                            <input type="number" name="age" class="form-input" value="{{ user.age or '' }}" min="1" max="120">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Height (cm)</label>
+                            <input type="number" name="height" class="form-input" value="{{ user.height or '' }}" min="50" max="250" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Weight (kg)</label>
+                        <input type="number" name="weight" class="form-input" value="{{ user.weight or '' }}" min="10" max="300" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Activity Level</label>
+                        <select name="activity_level" class="form-select">
+                            <option value="">Select...</option>
+                            <option value="sedentary" {% if user.activity_level == 'sedentary' %}selected{% endif %}>Sedentary</option>
+                            <option value="light" {% if user.activity_level == 'light' %}selected{% endif %}>Light</option>
+                            <option value="moderate" {% if user.activity_level == 'moderate' %}selected{% endif %}>Moderate</option>
+                            <option value="active" {% if user.activity_level == 'active' %}selected{% endif %}>Active</option>
+                            <option value="very_active" {% if user.activity_level == 'very_active' %}selected{% endif %}>Very Active</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+
+            {% if user.has_diabetes %}
+            <div class="card" style="margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 1rem; color: var(--primary-blue);">
+                    <i class="fas fa-heartbeat"></i> Diabetes Information
+                </h3>
+                <div style="padding: 1rem; background: var(--gray-50); border-radius: 0.5rem;">
+                    <p><strong>Type:</strong> {{ user.diabetes_type or 'Not specified' }}</p>
+                    <p style="margin-top: 0.5rem;"><strong>Status:</strong> Active</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

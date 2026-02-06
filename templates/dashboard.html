@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Glocusense{% endblock %}
+
+{% block content %}
+<div class="mobile-container">
+    <div class="mobile-header">
+        <div class="container">
+            <div style="padding: 1.5rem 0;">
+                <h1 style="color: white; margin-bottom: 0.5rem;">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </h1>
+                <p style="color: rgba(255,255,255,0.9);">Welcome back, {{ user.first_name or user.username }}!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-content">
+        <div class="container">
+            <!-- Quick Actions -->
+            <div class="grid grid-2" style="margin-bottom: 1.5rem;">
+                <div class="card" onclick="toggleSearchModal()" style="cursor: pointer;">
+                    <div class="card-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="card-title">Search Foods</h3>
+                </div>
+
+                <div class="card" onclick="window.location.href='{{ url_for('diabetes.record') }}'" style="cursor: pointer;">
+                    <div class="card-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <h3 class="card-title">Record Glucose</h3>
+                </div>
+            </div>
+
+            {% if user.has_diabetes %}
+            <!-- Diabetes Records -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 style="color: var(--primary-blue);">
+                        <i class="fas fa-chart-line"></i> Blood Glucose Records
+                    </h2>
+                    <a href="{{ url_for('diabetes.record') }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                        <i class="fas fa-plus"></i> Record
+                    </a>
+                </div>
+                {% if diabetes_records %}
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        {% for record in diabetes_records %}
+                        <div style="padding: 1rem; background: var(--gray-50); border-radius: 0.5rem; border-left: 4px solid var(--primary-blue);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                <strong style="color: var(--gray-900);">{{ record.record_date.strftime('%B %d, %Y') if record.record_date else record.created_at.strftime('%B %d, %Y') if record.created_at else 'Today' }}</strong>
+                                <a href="{{ url_for('diabetes.progress') }}" style="color: var(--primary-blue); font-size: 0.875rem; text-decoration: none;">
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; font-size: 0.875rem;">
+                                {% if record.before_breakfast %}
+                                <div>
+                                    <span style="color: var(--gray-600);">Before Breakfast:</span>
+                                    <strong style="color: var(--primary-blue); display: block;">{{ record.before_breakfast }} mg/dL</strong>
+                                </div>
+                                {% endif %}
+                                {% if record.after_breakfast %}
+                                <div>
+                                    <span style="color: var(--gray-600);">After Breakfast:</span>
+                                    <strong style="color: var(--primary-blue); display: block;">{{ record.after_breakfast }} mg/dL</strong>
+                                </div>
+                                {% endif %}
+                                {% if record.before_lunch %}
+                                <div>
+                                    <span style="color: var(--gray-600);">Before Lunch:</span>
+                                    <strong style="color: var(--primary-blue); display: block;">{{ record.before_lunch }} mg/dL</strong>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: var(--gray-500); text-align: center; padding: 1rem;">No records yet. Start tracking your glucose levels!</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Recommendations -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 style="color: var(--primary-blue);">
+                        <i class="fas fa-lightbulb"></i> Recommendations
+                    </h2>
+                    <a href="{{ url_for('recommendations.list') }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                        <i class="fas fa-arrow-right"></i> View All
+                    </a>
+                </div>
+                {% if recommendations %}
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        {% for rec in recommendations %}
+                        <div style="padding: 1rem; background: var(--gray-50); border-radius: 0.5rem;">
+                            <h4 style="color: var(--gray-900); margin-bottom: 0.25rem;">{{ rec.title }}</h4>
+                            <p style="color: var(--gray-600); font-size: 0.875rem;">{{ rec.description or 'Personalized recommendation for you' }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: var(--gray-500); text-align: center; padding: 1rem;">No recommendations yet. Complete your profile to get personalized suggestions!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Modal -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 style="color: var(--primary-blue);">
+                <i class="fas fa-search"></i> Search Foods
+            </h2>
+            <button class="modal-close" onclick="closeModal('searchModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form method="GET" action="{{ url_for('search.results') }}">
+            <div class="form-group">
+                <input type="search" name="q" class="form-input" placeholder="Search for diabetes-friendly foods..." autofocus>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

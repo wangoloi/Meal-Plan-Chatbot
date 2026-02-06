@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Goal Details - Glocusense{% endblock %}
+
+{% block content %}
+<div class="mobile-container">
+    <div class="mobile-header">
+        <div class="container">
+            <div style="padding: 1.5rem 0;">
+                <h1 style="color: white; margin-bottom: 0.5rem;">
+                    <i class="fas fa-bullseye"></i> Goal Details
+                </h1>
+                <p style="color: rgba(255,255,255,0.9);">View and manage your goal</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-content">
+        <div class="container" style="max-width: 600px; margin: 0 auto;">
+            {% if goal %}
+                <!-- Goal Information Card -->
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
+                        <div>
+                            <h2 style="color: var(--primary-blue); margin-bottom: 0.5rem;">
+                                <i class="fas fa-{{ 'heartbeat' if goal.goal_type == 'blood_glucose_range' else 'calendar-check' if goal.goal_type == 'daily_readings' else 'utensils' if goal.goal_type == 'meal_planning' else 'running' if goal.goal_type == 'activity' else 'pills' if goal.goal_type == 'medication' else 'target' }}"></i>
+                                {{ goal.goal_type|replace('_', ' ')|title }}
+                            </h2>
+                            {% if goal.status %}
+                            <span style="padding: 0.5rem 0.75rem; background: {% if goal.status == 'active' %}var(--success){% elif goal.status == 'completed' %}var(--primary-blue){% elif goal.status == 'paused' %}var(--gray-400){% else %}var(--error){% endif %}; color: white; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 600;">
+                                {{ goal.status|title }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('goals.list') }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                    </div>
+
+                    <!-- Goal Type Specific Details -->
+                    {% if goal.goal_type == 'blood_glucose_range' %}
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--gray-900); margin-bottom: 1rem;">
+                                <i class="fas fa-tint"></i> Target Range
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                <div style="padding: 1.5rem; background: var(--gray-50); border-radius: 0.75rem; text-align: center;">
+                                    <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem;">
+                                        <i class="fas fa-arrow-down"></i> Minimum Target
+                                    </div>
+                                    <div style="font-size: 2rem; font-weight: 600; color: var(--primary-blue);">
+                                        {{ goal.target_min or 'N/A' }}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">mg/dL</div>
+                                </div>
+                                <div style="padding: 1.5rem; background: var(--gray-50); border-radius: 0.75rem; text-align: center;">
+                                    <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem;">
+                                        <i class="fas fa-arrow-up"></i> Maximum Target
+                                    </div>
+                                    <div style="font-size: 2rem; font-weight: 600; color: var(--primary-blue);">
+                                        {{ goal.target_max or 'N/A' }}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">mg/dL</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1rem; padding: 1rem; background: rgba(59, 130, 246, 0.1); border-radius: 0.5rem;">
+                                <div style="font-size: 0.875rem; color: var(--primary-blue);">
+                                    <i class="fas fa-info-circle"></i> <strong>Recommended Range:</strong> 70-130 mg/dL before meals, less than 180 mg/dL after meals
+                                </div>
+                            </div>
+                        </div>
+                    {% elif goal.goal_type == 'daily_readings' %}
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--gray-900); margin-bottom: 1rem;">
+                                <i class="fas fa-calendar-check"></i> Reading Target
+                            </h3>
+                            <div style="padding: 1.5rem; background: var(--gray-50); border-radius: 0.75rem; text-align: center;">
+                                <div style="font-size: 3rem; font-weight: 600; color: var(--primary-blue); margin-bottom: 0.5rem;">
+                                    {{ goal.readings_per_day or 'N/A' }}
+                                </div>
+                                <div style="font-size: 1rem; color: var(--gray-600);">readings per day</div>
+                            </div>
+                        </div>
+                    {% elif goal.goal_type == 'meal_planning' %}
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--gray-900); margin-bottom: 1rem;">
+                                <i class="fas fa-utensils"></i> Meal Planning Targets
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                <div style="padding: 1.5rem; background: var(--gray-50); border-radius: 0.75rem; text-align: center;">
+                                    <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem;">Meals Per Day</div>
+                                    <div style="font-size: 2rem; font-weight: 600; color: var(--primary-blue);">
+                                        {{ goal.meals_per_day or 'N/A' }}
+                                    </div>
+                                </div>
+                                <div style="padding: 1.5rem; background: var(--gray-50); border-radius: 0.75rem; text-align: center;">
+                                    <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem;">Diabetes-Friendly</div>
+                                    <div style="font-size: 2rem; font-weight: 600; color: var(--success);">
+                                        {{ goal.diabetes_friendly_goal or 'N/A' }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif goal.goal_type == 'activity' %}
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--gray-900); margin-bottom: 1rem;">
+                                <i class="fas fa-running"></i> Activity Target
+                            </h3>
+                            <div style="padding: 1.5rem; background: var(--gray-50); border-radius: 0.75rem; text-align: center;">
+                                <div style="font-size: 3rem; font-weight: 600; color: var(--primary-blue); margin-bottom: 0.5rem;">
+                                    {{ goal.activity_minutes or 'N/A' }}
+                                </div>
+                                <div style="font-size: 1rem; color: var(--gray-600);">minutes per week</div>
+                            </div>
+                            <div style="margin-top: 1rem; padding: 1rem; background: rgba(59, 130, 246, 0.1); border-radius: 0.5rem;">
+                                <div style="font-size: 0.875rem; color: var(--primary-blue);">
+                                    <i class="fas fa-info-circle"></i> <strong>Recommended:</strong> 150 minutes of moderate activity per week (30 minutes, 5 days)
+                                </div>
+                            </div>
+                        </div>
+                    {% elif goal.goal_type == 'medication' %}
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--gray-900); margin-bottom: 1rem;">
+                                <i class="fas fa-pills"></i> Medication Adherence Target
+                            </h3>
+                            <div style="padding: 1.5rem; background: var(--gray-50); border-radius: 0.75rem; text-align: center;">
+                                <div style="font-size: 3rem; font-weight: 600; color: var(--primary-blue); margin-bottom: 0.5rem;">
+                                    {{ goal.medication_adherence or 'N/A' }}%
+                                </div>
+                                <div style="font-size: 1rem; color: var(--gray-600);">adherence rate</div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Additional Information -->
+                    <div style="border-top: 1px solid var(--gray-200); padding-top: 1.5rem; margin-top: 1.5rem;">
+                        {% if goal.target_date %}
+                        <div style="margin-bottom: 1rem;">
+                            <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">
+                                <i class="fas fa-calendar-alt"></i> Target Date
+                            </div>
+                            <div style="font-size: 1.125rem; font-weight: 600; color: var(--gray-900);">
+                                {{ goal.target_date.strftime('%B %d, %Y') if goal.target_date else 'No target date set' }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if goal.notes %}
+                        <div style="margin-bottom: 1rem;">
+                            <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">
+                                <i class="fas fa-sticky-note"></i> Notes
+                            </div>
+                            <div style="font-size: 0.875rem; color: var(--gray-700); line-height: 1.6;">
+                                {{ goal.notes }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">
+                                    <i class="fas fa-calendar-plus"></i> Created
+                                </div>
+                                <div style="font-size: 0.875rem; color: var(--gray-700);">
+                                    {{ goal.created_at.strftime('%B %d, %Y') if goal.created_at else 'Recently' }}
+                                </div>
+                            </div>
+                            {% if goal.updated_at %}
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">
+                                    <i class="fas fa-edit"></i> Last Updated
+                                </div>
+                                <div style="font-size: 0.875rem; color: var(--gray-700);">
+                                    {{ goal.updated_at.strftime('%B %d, %Y') if goal.updated_at else 'Never' }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <a href="{{ url_for('diabetes.dashboard') }}" class="btn btn-primary btn-full">
+                            <i class="fas fa-tachometer-alt"></i> View Dashboard
+                        </a>
+                        <a href="{{ url_for('diabetes.progress') }}" class="btn btn-secondary btn-full">
+                            <i class="fas fa-chart-line"></i> Track Progress
+                        </a>
+                        <a href="{{ url_for('goals.list') }}" class="btn btn-secondary btn-full">
+                            <i class="fas fa-list"></i> Back to Goals List
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Goal Not Found -->
+                <div class="card" style="margin-top: 1.5rem; text-align: center; padding: 2rem;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--error); margin-bottom: 1rem;"></i>
+                    <h3 style="color: var(--gray-900); margin-bottom: 0.75rem;">Goal Not Found</h3>
+                    <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+                        The goal you're looking for doesn't exist or has been removed.
+                    </p>
+                    <a href="{{ url_for('goals.list') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Back to Goals
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

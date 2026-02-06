@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - Glocusense{% endblock %}
+
+{% block content %}
+<div class="mobile-container">
+    <div class="mobile-header">
+        <div class="container">
+            <div style="padding: 1.5rem 0;">
+                <h1 style="color: white; margin-bottom: 0.5rem;">
+                    <i class="fas fa-search"></i> Search Results
+                </h1>
+                <p style="color: rgba(255,255,255,0.9);">
+                    {% if query %}
+                        Results for "{{ query }}"
+                    {% else %}
+                        Search for foods
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-content">
+        <div class="container">
+            <!-- Search Form -->
+            <div class="card" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                <form method="GET" action="{{ url_for('search.results') }}">
+                    <div class="form-group">
+                        <input type="search" name="q" class="form-input" 
+                               placeholder="Search for diabetes-friendly foods..." 
+                               value="{{ query }}" autofocus>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </form>
+            </div>
+
+            <!-- Results -->
+            {% if query %}
+                {% if foods %}
+                    <div class="card">
+                        <h3 style="color: var(--primary-blue); margin-bottom: 1rem;">
+                            <i class="fas fa-utensils"></i> Found {{ foods|length }} Result(s)
+                        </h3>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            {% for food in foods %}
+                            <div style="padding: 1.5rem; background: var(--gray-50); border-radius: 0.75rem; border-left: 4px solid {% if food.diabetes_friendly %}var(--success){% else %}var(--gray-400){% endif %};">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                    <div>
+                                        <h4 style="color: var(--gray-900); margin-bottom: 0.25rem;">
+                                            {{ food.name }}
+                                            {% if food.diabetes_friendly %}
+                                            <span style="color: var(--success); font-size: 0.75rem; margin-left: 0.5rem;">
+                                                <i class="fas fa-check-circle"></i> Diabetes-Friendly
+                                            </span>
+                                            {% endif %}
+                                        </h4>
+                                        {% if food.local_name %}
+                                        <p style="color: var(--gray-600); font-size: 0.875rem; font-style: italic;">
+                                            {{ food.local_name }}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                    <span style="padding: 0.5rem 0.75rem; background: var(--primary-blue); color: white; border-radius: 0.5rem; font-size: 0.75rem;">
+                                        {{ food.category|title }}
+                                    </span>
+                                </div>
+                                
+                                {% if food.description %}
+                                <p style="color: var(--gray-700); font-size: 0.875rem; margin-bottom: 1rem;">
+                                    {{ food.description }}
+                                </p>
+                                {% endif %}
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.75rem; font-size: 0.875rem;">
+                                    <div>
+                                        <span style="color: var(--gray-600);">Calories:</span>
+                                        <strong style="color: var(--gray-900); display: block;">{{ food.calories }} kcal</strong>
+                                    </div>
+                                    <div>
+                                        <span style="color: var(--gray-600);">Carbs:</span>
+                                        <strong style="color: var(--gray-900); display: block;">{{ food.carbohydrates }}g</strong>
+                                    </div>
+                                    <div>
+                                        <span style="color: var(--gray-600);">Protein:</span>
+                                        <strong style="color: var(--gray-900); display: block;">{{ food.protein }}g</strong>
+                                    </div>
+                                    <div>
+                                        <span style="color: var(--gray-600);">Fiber:</span>
+                                        <strong style="color: var(--gray-900); display: block;">{{ food.fiber }}g</strong>
+                                    </div>
+                                    {% if food.glycemic_index %}
+                                    <div>
+                                        <span style="color: var(--gray-600);">GI:</span>
+                                        <strong style="color: var(--gray-900); display: block;">{{ food.glycemic_index }}</strong>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="card" style="text-align: center; padding: 2rem;">
+                        <i class="fas fa-search" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+                        <p style="color: var(--gray-600); margin-bottom: 1rem;">
+                            No results found for "{{ query }}"
+                        </p>
+                        <p style="color: var(--gray-500); font-size: 0.875rem;">
+                            Try different keywords or browse all foods
+                        </p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-search" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--gray-600);">
+                        Enter a search term to find diabetes-friendly foods
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

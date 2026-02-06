@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Set Diabetes Goal - Glocusense{% endblock %}
+
+{% block content %}
+<div class="mobile-container">
+    <div class="mobile-header">
+        <div class="container">
+            <div style="padding: 1.5rem 0;">
+                <h1 style="color: white; margin-bottom: 0.5rem;">
+                    <i class="fas fa-bullseye"></i> Set Diabetes Goal
+                </h1>
+                <p style="color: rgba(255,255,255,0.9);">Define your diabetes management targets</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-content">
+        <div class="container" style="max-width: 500px; margin: 0 auto;">
+            <form method="POST" action="{{ url_for('goals.create') }}">
+                <div class="card" style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary-blue);">
+                        <i class="fas fa-target"></i> Goal Details
+                    </h3>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-tag"></i> Goal Type
+                        </label>
+                        <select class="form-select" name="goal_type" id="goal_type" required>
+                            <option value="">Select goal type...</option>
+                            <option value="blood_glucose_range">Blood Glucose Target Range</option>
+                            <option value="daily_readings">Daily Glucose Readings</option>
+                            <option value="meal_planning">Meal Planning</option>
+                            <option value="activity">Physical Activity</option>
+                            <option value="medication">Medication Adherence</option>
+                        </select>
+                    </div>
+
+                    <!-- Blood Glucose Range Fields -->
+                    <div id="glucose_range_fields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-arrow-down"></i> Target Minimum (mg/dL)
+                            </label>
+                            <input type="number" class="form-input" name="target_min" 
+                                   placeholder="e.g., 70" min="50" max="200" step="1">
+                            <small style="color: var(--gray-500); font-size: 0.75rem;">
+                                Recommended: 70-130 mg/dL before meals
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-arrow-up"></i> Target Maximum (mg/dL)
+                            </label>
+                            <input type="number" class="form-input" name="target_max" 
+                                   placeholder="e.g., 180" min="100" max="250" step="1">
+                            <small style="color: var(--gray-500); font-size: 0.75rem;">
+                                Recommended: Less than 180 mg/dL after meals
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Daily Readings Fields -->
+                    <div id="daily_readings_fields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-check"></i> Target Readings Per Day
+                            </label>
+                            <select class="form-select" name="readings_per_day">
+                                <option value="1">1 reading per day</option>
+                                <option value="2">2 readings per day</option>
+                                <option value="3" selected>3 readings per day (Recommended)</option>
+                                <option value="4">4+ readings per day</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Meal Planning Fields -->
+                    <div id="meal_planning_fields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-utensils"></i> Meals Per Day
+                            </label>
+                            <select class="form-select" name="meals_per_day">
+                                <option value="3">3 meals per day</option>
+                                <option value="4">4 meals per day</option>
+                                <option value="5">5-6 smaller meals</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-check-circle"></i> Diabetes-Friendly Meals
+                            </label>
+                            <select class="form-select" name="diabetes_friendly_goal">
+                                <option value="50">At least 50% diabetes-friendly</option>
+                                <option value="75" selected>At least 75% diabetes-friendly</option>
+                                <option value="100">100% diabetes-friendly meals</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Activity Fields -->
+                    <div id="activity_fields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-running"></i> Activity Minutes Per Week
+                            </label>
+                            <input type="number" class="form-input" name="activity_minutes" 
+                                   placeholder="e.g., 150" min="30" max="600" step="30">
+                            <small style="color: var(--gray-500); font-size: 0.75rem;">
+                                Recommended: 150 minutes per week (30 min, 5 days)
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Medication Fields -->
+                    <div id="medication_fields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-pills"></i> Medication Adherence Target
+                            </label>
+                            <select class="form-select" name="medication_adherence">
+                                <option value="80">At least 80% adherence</option>
+                                <option value="90" selected>At least 90% adherence</option>
+                                <option value="100">100% adherence</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Common Fields -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-alt"></i> Target Date (Optional)
+                        </label>
+                        <input type="date" class="form-input" name="target_date" 
+                               min="{{ today.strftime('%Y-%m-%d') if today else '' }}">
+                        <small style="color: var(--gray-500); font-size: 0.75rem;">
+                            When do you want to achieve this goal?
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-sticky-note"></i> Notes (Optional)
+                        </label>
+                        <textarea class="form-input" name="notes" rows="3" 
+                                  placeholder="Add any additional notes about this goal..."></textarea>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-save"></i> Create Goal
+                        </button>
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary btn-full">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show/hide fields based on goal type selection
+document.getElementById('goal_type').addEventListener('change', function() {
+    // Hide all field groups
+    document.getElementById('glucose_range_fields').style.display = 'none';
+    document.getElementById('daily_readings_fields').style.display = 'none';
+    document.getElementById('meal_planning_fields').style.display = 'none';
+    document.getElementById('activity_fields').style.display = 'none';
+    document.getElementById('medication_fields').style.display = 'none';
+    
+    // Show relevant field group
+    const goalType = this.value;
+    if (goalType === 'blood_glucose_range') {
+        document.getElementById('glucose_range_fields').style.display = 'block';
+    } else if (goalType === 'daily_readings') {
+        document.getElementById('daily_readings_fields').style.display = 'block';
+    } else if (goalType === 'meal_planning') {
+        document.getElementById('meal_planning_fields').style.display = 'block';
+    } else if (goalType === 'activity') {
+        document.getElementById('activity_fields').style.display = 'block';
+    } else if (goalType === 'medication') {
+        document.getElementById('medication_fields').style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

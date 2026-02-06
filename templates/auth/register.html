@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - Glocusense{% endblock %}
+
+{% block extra_css %}
+<style>
+    .step-content {
+        display: none;
+    }
+    .step-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease-out;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mobile-container">
+    <div class="mobile-header">
+        <div class="container">
+            <div style="text-align: center; padding: 2rem 0;">
+                <i class="fas fa-user-plus" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.9;"></i>
+                <h1 style="color: white; margin-bottom: 0.5rem;">Get Started</h1>
+                <p style="color: rgba(255,255,255,0.9);">Create your account in just a few steps</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-content">
+        <div class="container" style="max-width: 400px; margin: 0 auto;">
+            <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm" data-multistep>
+                <!-- Step Indicator -->
+                <div class="steps">
+                    <div class="step active">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Account</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Details</div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Account Information -->
+                <div class="step-content active">
+                    <div class="card">
+                        <h3 style="margin-bottom: 1.5rem; color: var(--primary-blue);">
+                            <i class="fas fa-user-circle"></i> Account Information
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="username" class="form-input" placeholder="Choose a username" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-input" placeholder="your.email@example.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password" class="form-input" placeholder="Create a strong password" required minlength="6">
+                        </div>
+
+                        <button type="button" class="btn btn-primary btn-full btn-next">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Diabetes Information -->
+                <div class="step-content">
+                    <div class="card">
+                        <h3 style="margin-bottom: 1.5rem; color: var(--primary-blue);">
+                            <i class="fas fa-heartbeat"></i> Health Information
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Do you have diabetes?</label>
+                            <select name="has_diabetes" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="diabetesTypeGroup" style="display: none;">
+                            <label class="form-label">Diabetes Type</label>
+                            <select name="diabetes_type" class="form-select">
+                                <option value="">Select type...</option>
+                                <option value="Type 1">Type 1</option>
+                                <option value="Type 2">Type 2</option>
+                                <option value="Gestational">Gestational</option>
+                                <option value="Prediabetes">Prediabetes</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="button" class="btn btn-secondary btn-full btn-prev">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <i class="fas fa-check"></i> Create Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hasDiabetesSelect = document.querySelector('select[name="has_diabetes"]');
+    const diabetesTypeGroup = document.getElementById('diabetesTypeGroup');
+    
+    if (hasDiabetesSelect && diabetesTypeGroup) {
+        hasDiabetesSelect.addEventListener('change', function() {
+            if (this.value === 'yes') {
+                diabetesTypeGroup.style.display = 'block';
+                diabetesTypeGroup.querySelector('select').required = true;
+            } else {
+                diabetesTypeGroup.style.display = 'none';
+                diabetesTypeGroup.querySelector('select').required = false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Complete Your Profile - Glocusense{% endblock %}
+
+{% block extra_css %}
+<style>
+    .step-content {
+        display: none;
+    }
+    .step-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease-out;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mobile-container">
+    <div class="mobile-header">
+        <div class="container">
+            <div style="text-align: center; padding: 2rem 0;">
+                <i class="fas fa-user-edit" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.9;"></i>
+                <h1 style="color: white; margin-bottom: 0.5rem;">Complete Your Profile</h1>
+                <p style="color: rgba(255,255,255,0.9);">Help us personalize your experience</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-content">
+        <div class="container" style="max-width: 500px; margin: 0 auto;">
+            <form method="POST" action="{{ url_for('main.onboarding') }}" id="onboardingForm" data-multistep>
+                <!-- Step Indicator -->
+                <div class="steps">
+                    <div class="step active">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Personal</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Health</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Preferences</div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Personal Information -->
+                <div class="step-content active">
+                    <div class="card">
+                        <h3 style="margin-bottom: 1.5rem; color: var(--primary-blue);">
+                            <i class="fas fa-user"></i> Personal Information
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" class="form-input" placeholder="Your first name" value="{{ current_user.first_name or '' }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-input" placeholder="Your last name" value="{{ current_user.last_name or '' }}">
+                        </div>
+
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Age</label>
+                                <input type="number" name="age" class="form-input" placeholder="Age" min="1" max="120" value="{{ current_user.age or '' }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Gender</label>
+                                <select name="gender" class="form-select">
+                                    <option value="">Select...</option>
+                                    <option value="male" {% if current_user.gender == 'male' %}selected{% endif %}>Male</option>
+                                    <option value="female" {% if current_user.gender == 'female' %}selected{% endif %}>Female</option>
+                                    <option value="other" {% if current_user.gender == 'other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary btn-full btn-next">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Health Information -->
+                <div class="step-content">
+                    <div class="card">
+                        <h3 style="margin-bottom: 1.5rem; color: var(--primary-blue);">
+                            <i class="fas fa-heartbeat"></i> Health Information
+                        </h3>
+                        
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Height (cm)</label>
+                                <input type="number" name="height" class="form-input" placeholder="Height" min="50" max="250" step="0.1" value="{{ current_user.height or '' }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Weight (kg)</label>
+                                <input type="number" name="weight" class="form-input" placeholder="Weight" min="10" max="300" step="0.1" value="{{ current_user.weight or '' }}">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Activity Level</label>
+                            <select name="activity_level" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="sedentary" {% if current_user.activity_level == 'sedentary' %}selected{% endif %}>Sedentary</option>
+                                <option value="light" {% if current_user.activity_level == 'light' %}selected{% endif %}>Light</option>
+                                <option value="moderate" {% if current_user.activity_level == 'moderate' %}selected{% endif %}>Moderate</option>
+                                <option value="active" {% if current_user.activity_level == 'active' %}selected{% endif %}>Active</option>
+                                <option value="very_active" {% if current_user.activity_level == 'very_active' %}selected{% endif %}>Very Active</option>
+                            </select>
+                        </div>
+
+                        {% if current_user.has_diabetes %}
+                        <div class="form-group">
+                            <label class="form-label">Diabetes Type</label>
+                            <select name="diabetes_type" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Type 1" {% if current_user.diabetes_type == 'Type 1' %}selected{% endif %}>Type 1</option>
+                                <option value="Type 2" {% if current_user.diabetes_type == 'Type 2' %}selected{% endif %}>Type 2</option>
+                                <option value="Gestational" {% if current_user.diabetes_type == 'Gestational' %}selected{% endif %}>Gestational</option>
+                                <option value="Prediabetes" {% if current_user.diabetes_type == 'Prediabetes' %}selected{% endif %}>Prediabetes</option>
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="button" class="btn btn-secondary btn-full btn-prev">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                            <button type="button" class="btn btn-primary btn-full btn-next">
+                                Next <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Complete -->
+                <div class="step-content">
+                    <div class="card">
+                        <h3 style="margin-bottom: 1.5rem; color: var(--primary-blue);">
+                            <i class="fas fa-check-circle"></i> Complete Profile
+                        </h3>
+                        
+                        <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+                            Review your information and complete your profile setup.
+                        </p>
+
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="button" class="btn btn-secondary btn-full btn-prev">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <i class="fas fa-check"></i> Complete Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
